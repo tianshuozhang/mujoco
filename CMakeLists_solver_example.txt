@@ -1,0 +1,43 @@
+cmake_minimum_required(VERSION 3.10)
+project(SparseSolverExample C)
+
+# 设置C标准
+set(CMAKE_C_STANDARD 99)
+
+# 查找MuJoCo库
+find_path(MUJOCO_INCLUDE_DIR mujoco/mujoco.h
+    PATHS "${CMAKE_SOURCE_DIR}/include"
+          "${CMAKE_SOURCE_DIR}/build/include"
+          ENV MUJOCO_INCLUDE_PATH
+)
+
+find_library(MUJOCO_LIBRARY mujoco
+    PATHS "${CMAKE_SOURCE_DIR}/build"
+          "${CMAKE_SOURCE_DIR}/bin"
+          ENV MUJOCO_LIBRARY_PATH
+)
+
+if(NOT MUJOCO_INCLUDE_DIR)
+    message(FATAL_ERROR "找不到MuJoCo头文件。请设置MUJOCO_INCLUDE_PATH环境变量")
+endif()
+
+if(NOT MUJOCO_LIBRARY)
+    message(FATAL_ERROR "找不到MuJoCo库文件。请先编译MuJoCo或设置MUJOCO_LIBRARY_PATH环境变量")
+endif()
+
+message(STATUS "MuJoCo头文件目录: ${MUJOCO_INCLUDE_DIR}")
+message(STATUS "MuJoCo库文件: ${MUJOCO_LIBRARY}")
+
+# 创建可执行文件
+add_executable(sparse_solver_example sparse_solver_example.c)
+
+# 包含头文件目录
+target_include_directories(sparse_solver_example PRIVATE ${MUJOCO_INCLUDE_DIR})
+
+# 链接MuJoCo库
+target_link_libraries(sparse_solver_example PRIVATE ${MUJOCO_LIBRARY})
+
+# Windows特定设置
+if(WIN32)
+    target_link_libraries(sparse_solver_example PRIVATE ws2_32)
+endif()
